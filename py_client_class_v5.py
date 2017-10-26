@@ -3,18 +3,26 @@ import sys
 import threading
 import time
 assert sys.version_info >= (3,5)
+portno = 20039
+rcv_buffer_size = 100
+server_name = 'localhost'
+
 class CONNECTION(object):
-    def __init__(self,rcv_buffer,portno,host):
+    def __init__(self,rcv_buffer,portno,host,name):
         self.colormap={}
         self.rcv_buffer = rcv_buffer
         self.portno = portno
         self.host = host
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.name = name
         server_address = (host,portno)
         print('connecting to %s port %s' % server_address)
         self.sock.connect(server_address)
         self.th = threading.Thread(target = self.rcv)
         self.th.start()
+        self.send(name)
+        time.sleep(0.5)
+        self.get_rtt()
     def rcv(self):
         try:
             while True:
@@ -51,6 +59,7 @@ class CONNECTION(object):
     def get_rtt(self):
         msg = 'rtt'
         try:
+            print("configuring network speed")
             st = time.time()
             self.sock.sendall(msg.encode('utf-8'))
             while True:
@@ -61,24 +70,24 @@ class CONNECTION(object):
                     self.sock.sendall(msg.encode('utf-8'))
                     break
         except:
-            print('rtt failed')
-            self.close()
+            print("rtt test failed")
+            raise
     def close(self):
         self.sock.close()
 
 connect = 0
 try:
-    # Send data
-    connect = CONNECTION(100,20039,'localhost')
-    message = input('Welcome, please input your name: ')
-    connect.send(message)
-    time.sleep(0.5)
-    connect.get_rtt()
+    usr_name = ''
+    while usr_name == '':
+        usr_name = input('Welcome, please input your name: ')
+    connect = CONNECTION(rcv_buffer_size,portno,server_name,usr_name)
+
+    message = ''
     while message != 'CLOSE' and connect.th.isAlive():
         message = input('')
         connect.send(message)
 except:
-    print('socket interupted')
+    print('bad socket')
     if connect:
         connect.close()
         print('socket closed')
