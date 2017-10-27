@@ -1,7 +1,7 @@
 # ChatRoom_PySocket
-#### Requirements
+## Requirements
 There is no need to install any extra libraries. The program is running on Python 3.5 using the standard packages only.  
-#### Usage
+## Usage
 - Make sure that you are running on Python 3.5 or above
 - **Set up the server side:** You should run the server-side script whenever you wish to start up a new chatroom.
    - 1. Make sure that your ip address is resolvable by clients
@@ -18,7 +18,7 @@ There is no need to install any extra libraries. The program is running on Pytho
        - [CLOSE]: leave the chatroom
        - [#*username*]: send unicast message to a user whose name is *username*
        - [##]: Get the latest members' information
-#### Todo list
+## Todo list
 - [x] Automatically append clients whenever the server receives connections  (10/27/2017)
 - [ ] FTP server
 - [ ] Dump most recent records to new members
