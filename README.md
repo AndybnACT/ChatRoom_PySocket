@@ -13,7 +13,7 @@ There is no need to install any extra libraries. The program is running on Pytho
        - [broadcast]: send a server-side message to all clients
    - *Warnings:* Make sure that all member thread are terminated before shutting down the server gracefully.
 - **Connect to the server from clients:** The member of the chatroom are implemented by client-side script. You could join a chatroom by specifying server's IP and port number  
-   - 1. Modify variables ```portno``` and ```server_name``` to server's port number and IP address
+   - 1. Modify variables ```portno``` and ```server_name``` as server's port number and IP address
    - Client-Side Commands:
        - [CLOSE]: leave the chatroom
        - [#*username*]: send unicast message to a user whose name is *username*
