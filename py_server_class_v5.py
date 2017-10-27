@@ -4,14 +4,44 @@ import threading
 import time
 import os
 assert sys.version_info >= (3,5)
+
+#### Default Seetings
 port_no = 20039
 rcv_buffer_size = 100
-host_name = 'localhost'
+######################
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = (host_name,port_no)
-sock.bind(server_address)
-sock.listen(0)
+########################## Get My IP address ##########################
+print("Configuring...")
+ipsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+try:
+    ipsock.connect(("8.8.8.8", 80))
+    host_name = ipsock.getsockname()[0]
+    print("Your IP address is :%s" % ipsock.getsockname()[0])
+    ipsock.close()
+except:
+    print("Can not resolve your public IP address")
+    print("The chatroom would be started at localhost")
+    print("Clients would be able to connect locally on '127.0.0.1' ")
+    host_name = "127.0.0.1"
+finally:
+    #ipsock.shutdown(socket.SHUT_RD)
+    ipsock.close()
+    print("The default port # for the chatroom is %d" % port_no)
+    print("Both IP address and port # should be known and reachable by clients.")
+########################################################################
+
+print("Initializing...")
+try:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address = (host_name,port_no)
+    sock.bind(server_address)
+    sock.listen(0)
+except OSError as OSerr:
+    print("Can not open the socket, addres might already been used.")
+    print("The problem might be solved by tring different port #")
+    print("Use '$netstat -t | grep '%d' ' to check" % port_no)
+    sys.exit()
+
 class CONNECTs(object):
     connects = []
     FTPs = []
@@ -67,7 +97,7 @@ class Chatroom(CONNECTs):
         else:
             print("null socket")
     def general_send(self,msg):
-        print('sending msg: %s to' % (msg),self.clien_addr)
+        print('sending msg: %s to %s, addr:' % (msg,self.config),self.clien_addr)
         try:
             if self.th.isAlive():
                 self.connection.sendall(msg.encode('utf-8'))
@@ -211,15 +241,15 @@ def auto_add_member_thread():
             KeepAlive |= member.th.isAlive()
     print("member adding thread terminated")
 FTPs = []
-print('starting up on %s port %s' % server_address)
+print('listening on %s port %s' % server_address)
 server_msg='''
                         Please input control messages:
                         [mode]:show all threads status
                         [close]:close a speific connection
                         [close all]:close connection
-                        [boardcast]:send msg to all client
-                        [FTP]:upload a file
-                        [FTP-send]:send file to a client
+                        [broadcast]:send msg to all client
+                        [FTP]:upload a file #UNAVAILABLE
+                        [FTP-send]:send file to a client #UNAVALIABLE
                         '''
 try:
     print(server_msg)
@@ -230,8 +260,8 @@ try:
     add_member_thread.start()
     while True:
         control_msg = input(': ')
-        if control_msg == 'boardcast':
-            msg = input('msg to boardcast: ')
+        if control_msg == 'broadcast':
+            msg = input('msg to broadcast: ')
             for i in connects:
                 if i.th.isAlive():
                     print('sending to %s (%s)' % (i.config, i.clien_addr))
@@ -243,6 +273,7 @@ try:
                     print('closing connection of #',i.clien_addr)
                     i.close()
             print('closing socket')
+            sock.shutdown(socket.SHUT_RDWR)
             sock.close()
             break
         elif control_msg == 'close':
@@ -292,3 +323,4 @@ except:
         i.close()
     sock.close()
     print('Connection closed unexpectly')
+    #raise #DEBUG

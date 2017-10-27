@@ -3,10 +3,9 @@ import sys
 import threading
 import time
 assert sys.version_info >= (3,5)
-portno = 20039
+portno = 20039                    #server's port
+server_name = '140.115.23.158'    #server's ip address
 rcv_buffer_size = 100
-server_name = 'localhost'
-
 class CONNECTION(object):
     def __init__(self,rcv_buffer,portno,host,name):
         self.colormap={}
@@ -85,6 +84,8 @@ try:
     message = ''
     while message != 'CLOSE' and connect.th.isAlive():
         message = input('')
+        if message == '':
+            continue
         connect.send(message)
 except:
     print('bad socket')
